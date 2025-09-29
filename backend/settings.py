@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-ulvhx6f0o)=70=m6s+!9b+9vv$xjq*t%4jrf!tp0u45xkc&djm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["www.api.funnypaints.com", "api.funnypaints.com", "83.228.210.144", "localhost", "127.0.0.1"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -100,8 +100,12 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "funnypaintsDB",
+        "USER": "root",
+        "PASSWORD": "7pped0@7UC-R",
+        "HOST": "127.0.0.1",
+        "PORT": "3306"
     }
 }
 
@@ -141,6 +145,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -154,4 +159,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 
 
-DOMAIN = "http://127.0.01:8000"
+# DOMAIN = "http://127.0.01:8000"
+DOMAIN = "https://api.funnypaints.com"
