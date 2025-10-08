@@ -10,5 +10,6 @@ urlpatterns = [
     path("category/add", views.add_new_category),
     path("model-images/add", views.add_model_images),
     path("wall-images/add", views.add_wall_images),
+    path("wall-images/get", views.get_wall_images),
     path("painting-requests", views.get_all_painting_requests),
 ]

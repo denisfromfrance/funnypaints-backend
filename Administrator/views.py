@@ -66,12 +66,14 @@ def get_images_of_categories(request):
             "category": image_category.category,
             "images": [
                 {
+                    "id": model_image.id,
                     "image": model_image.image.url,
-                    "wall_images": [{"id": wall_image.id, "image": wall_image.image.url} for wall_image in model_image.wall_image_set.all()]
+                    "productName": model_image.product_name
+                    # "wall_images": [{"id": wall_image.id, "image": wall_image.image.url} for wall_image in model_image.wall_image_set.all()]
                 } for model_image in image_category.modelimage_set.all()
             ]
         })
-
+    
     response["status"] = "ok"
     return Response(response)
 
@@ -86,7 +88,7 @@ def change_painting_request_status(request):
 
     try:
         requestID = data["requestID"]
-        newStateID = data["newStateID"]
+        newStateID = data["newStatusID"]
 
         paintRequest = PaintRequest.objects.get(id=requestID)
         if paintRequest is not None:
@@ -94,7 +96,8 @@ def change_painting_request_status(request):
             paintRequest.request_status = newStatus
             paintRequest.save()
             response["status"] = "ok"
-    except:
+    except Exception as e:
+        print(e)
         pass
     return Response(response)
 
@@ -128,12 +131,13 @@ def add_model_images(request):
 
     try:
         categoryID = data["categoryID"]
+        name = data["productName"]
         files = request.FILES.getlist("images")
         category = ImageCategories.objects.get(id=categoryID)
         if category is not None:
             for file in files:
                 try:
-                    model_image = ModelImage.objects.create(image=file, image_category=category)
+                    model_image = ModelImage.objects.create(image=file, product_name=name, image_category=category)
                 except Exception as e:
                     print(e)
         response["status"] = "ok"
@@ -153,18 +157,54 @@ def add_wall_images(request):
     print(data)
 
     try:
-        categoryID = data["modelImageID"]
+        # categoryID = data["modelImageID"]
         files = request.FILES.getlist("wallImages")
 
-        print(categoryID)
+        # print(categoryID)
         print(files)
-        model_image = ModelImage.objects.get(id=categoryID)
-        if model_image is not None:
-            for file in files:
-                try:
-                    wall_image = WallImage.objects.create(image=file, model_image=model_image)
-                except Exception as e:
-                    print(e)
+        # model_image = ModelImage.objects.get(id=categoryID)
+        # if model_image is not None:
+
+        for file in files:
+            try:
+                wall_image = WallImage.objects.create(image=file)
+            except Exception as e:
+                print(e)
+                return Response(response)
+            
+        response["status"] = "ok"
+    except Exception as exception:
+        print(exception)
+        pass
+    return Response(response)
+
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([AllowAny])
+def get_wall_images(request):
+    response = {"status": "failed"}
+    data = request.data
+
+    print(data)
+
+    try:
+        # categoryID = data["modelImageID"]
+        # print(categoryID)
+        # model_image = ModelImage.objects.get(id=categoryID)
+        # if model_image is not None:
+
+        wallImages = WallImage.objects.all()
+        wallImagesData = []
+        for file in wallImages:
+            try:
+                wallImagesData.append({
+                    "wallImageID": file.id,
+                    "image": settings.DOMAIN + file.image.url})
+            except Exception as e:
+                print(e)
+                return Response(response)
+        response["wallImages"] = wallImagesData  
         response["status"] = "ok"
     except Exception as exception:
         print(exception)
@@ -186,49 +226,55 @@ def get_all_painting_requests(request):
         request_statuses_ids = [status.id for status in request_statuses]
         request_statuses_ids = sorted(request_statuses_ids)
 
-        print(request_statuses_ids)
+        # print(request_statuses_ids)
 
         for request in PaintRequest.objects.all():
+            try:
+            # print(dir(request))
+                userUploadedImages = request.userselectedimage_set.all()
+                requests_information.append({
+                    "id": request.id,
+                    "wall_image": settings.DOMAIN + request.wall_image.image.url,
+                    "model_image": settings.DOMAIN + request.model_image.image.url,
+                    "request_status": request.request_status.status,
+                    "datetime": request.datetime,
+                    "user_uploaded_image": settings.DOMAIN + userUploadedImages[0].image.url if len(userUploadedImages) > 0 else "",
+                    "user": {
+                        "userID": request.user.id,
+                        "firstName": request.user.first_name,
+                        "lastName": request.user.last_name
+                        }
+                })
+
+            
+                # print(dir(request_statuses_ids))
+                idIndex = int(request_statuses_ids.index(request.request_status.id))
+                # print("Index", idIndex)
+                if len(request_statuses_ids) > idIndex:
+                    id = request_statuses_ids[idIndex + 1]
+                    next_status = RequestStatus.objects.get(id=id)
+                    requests_information[-1]["nextStatus"] = {
+                        "id": next_status.id,
+                        "status": next_status.status
+                    }
+            except Exception as e:
+                print(e)
+                pass
+    else:
+        for request in PaintRequest.objects.filter(user=request.user):
+            userUploadedImages = request.userselectedimage_set.all()
+
             # print(dir(request))
             requests_information.append({
                 "id": request.id,
                 "wall_image": settings.DOMAIN + request.wall_image.image.url,
                 "model_image": settings.DOMAIN + request.model_image.image.url,
                 "request_status": request.request_status.status,
-                "user_uploaded_image": settings.DOMAIN + request.userselectedimage_set.all()[0].image.url,
-                "user": {
-                    "userID": request.user.id,
-                    "firstName": request.user.first_name,
-                    "lastName": request.user.last_name
-                    }
-            })
-
-            try:
-                # print(dir(request_statuses_ids))
-                idIndex = int(request_statuses_ids.index(request.request_status.id))
-                print("Index", idIndex)
-                id = request_statuses_ids[idIndex + 1]
-                next_status = RequestStatus.objects.get(id=id)
-                requests_information[-1]["nextStatus"] = {
-                    "id": next_status.id,
-                    "status": next_status.status
-                }
-            except Exception as e:
-                print(e)
-                pass
-    else:
-        for request in PaintRequest.objects.filter(user=request.user):
-            print(dir(request))
-            requests_information.append({
-                "id": request.id,
-                "wall_image": settings.DOMAIN + request.wall_image.image.url,
-                "model_image": settings.DOMAIN + request.model_image.image.url,
-                "request_status": request.request_status.status,
-                "user_uploaded_image": settings.DOMAIN + request.userselectedimage_set.all()[0].image.url
+                "user_uploaded_image": settings.DOMAIN + userUploadedImages[0].image.url if len(userUploadedImages) > 0 else ""
             })
     
     response["status"] = "ok"
     response["requests"] = requests_information
-    print(response)
+    # print(response)
     return Response(response)
 

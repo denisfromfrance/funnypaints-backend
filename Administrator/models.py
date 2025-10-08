@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.utils import timezone
+
 from Data.models import Country, State, City
 
 # Create your models here.
@@ -10,7 +12,9 @@ class RegisteredUser(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
     state = models.ForeignKey(State, on_delete=models.CASCADE, null=True)
     city = models.ForeignKey(City, on_delete=models.CASCADE, null=True)
+    street = models.CharField(max_length=100, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profileImage = models.FileField(upload_to='user/profile-images', null=True)
 
 
 class ImageCategories(models.Model):
@@ -23,6 +27,7 @@ class WallImage(models.Model):
 
 class ModelImage(models.Model):
     id = models.AutoField(primary_key=True)
+    product_name = models.CharField(max_length=20)
     image = models.FileField(upload_to="images/model-images")
     image_category = models.ForeignKey(ImageCategories, on_delete=models.CASCADE)
     wall_images = models.ManyToManyField(WallImage, through='ModelImageHasWallImage')
@@ -43,6 +48,7 @@ class PaintRequest(models.Model):
     wall_image = models.ForeignKey(WallImage, on_delete=models.CASCADE, null=True)
     model_image = models.ForeignKey(ModelImage, on_delete=models.CASCADE, null=True, blank=True)
     request_status = models.ForeignKey(RequestStatus, on_delete=models.CASCADE, null=True, blank=True)
+    datetime = models.DateTimeField(default=timezone.datetime.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
 
