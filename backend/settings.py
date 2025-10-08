@@ -99,13 +99,17 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
+    # "default": {
+    #     "ENGINE": "django.db.backends.mysql",
+    #     "NAME": "funnypaintsDB",
+    #     "USER": "root",
+    #     "PASSWORD": "7pped0@7UC-R",
+    #     "HOST": "127.0.0.1",
+    #     "PORT": "3306"
+    # }
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "funnypaintsDB",
-        "USER": "root",
-        "PASSWORD": "7pped0@7UC-R",
-        "HOST": "127.0.0.1",
-        "PORT": "3306"
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "db.sqlite3",
     }
 }
 
@@ -159,5 +163,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 
 
-# DOMAIN = "http://127.0.01:8000"
-DOMAIN = "https://api.funnypaints.com"
+DOMAIN = "http://127.0.01:8000"
+# DOMAIN = "https://api.funnypaints.com"
