@@ -39,7 +39,17 @@ def get_categories(request):
                 categories_info.append({
                     "id": category.id,
                     "category": category.category,
-                    "images": [{"imageID": image_model.id, "productName": image_model.product_name, "image": settings.DOMAIN + image_model.image.url} for image_model in category.modelimage_set.all()]
+                    "images": [
+                        {
+                            "imageID": image_model.id, 
+                            "productName": image_model.product_name, 
+                            "image": settings.DOMAIN + image_model.image.url,
+                            "smallSize": image_model.small_size_price,
+                            "mediumSize": image_model.medium_size_price,
+                            "largeSize": image_model.large_size_price
+                        } 
+                        for image_model in category.modelimage_set.all()
+                    ]
                 })
         response["wallImages"] = [{"wallImageID": wall_image.id, "image": settings.DOMAIN + wall_image.image.url} for wall_image in WallImage.objects.all()]
         response["status"] = "ok"

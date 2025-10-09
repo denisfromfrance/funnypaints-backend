@@ -17,9 +17,11 @@ from rest_framework.permissions import (
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 
-from .models import ImageCategories, ModelImage, WallImage, PaintRequest, RequestStatus
+from .models import ImageCategories, ModelImage, WallImage, PaintRequest, RequestStatus, Suit
 
 from django.conf import settings
+
+import os
 
 # Create your views here.
 @api_view(["POST"])
@@ -277,4 +279,158 @@ def get_all_painting_requests(request):
     response["requests"] = requests_information
     # print(response)
     return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_category(request):
+    response = {"status": "failed"}
+    try:
+        categoryID = request.data["categoryID"]
+        imageCategories = ImageCategories.objects.get(id=categoryID)
+        for image in imageCategories.modelimage_set.all():
+            imagePath = image.image.path
+            image.delete()
+            os.remove(imagePath)
+        imageCategories.delete()
+        response["status"] = "ok"
+    except Exception as e:
+        print(e)
+    return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def rename_category(request):
+    response = {"status": "failed"}
+    try:
+        categoryID = request.data["categoryID"]
+        name = request.data["name"]
+        imageCategories = ImageCategories.objects.get(id=categoryID)
+        imageCategories.category = name
+        imageCategories.save()
+        response["status"] = "ok"
+    except Exception as e:
+        print(e)
+    return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_model(request):
+    response = {"status": "failed"}
+    try:
+        modelImageID = request.data["modelID"]
+        imageModel = ModelImage.objects.get(id=modelImageID)
+        imagePath = imageModel.image.path
+        imageModel.delete()
+        os.remove(imagePath)
+        response["status"] = "ok"
+    except Exception as e:
+        print(e)
+    return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def change_model(request):
+    response = {"status": "failed"}
+    print(request.data)
+    model_image = None
+    try:
+        modelImageID = request.data["modelImageID"]
+        model_image = ModelImage.objects.get(id=modelImageID)
+    except:
+        categoryID = request.data["categoryID"]
+        category = ImageCategories.objects.get(id=categoryID)
+
+        if category is not None:
+            model_image = ModelImage.objects.create(
+                image_category=category
+            )
+
+    if model_image is not None:
+        try:
+            file = request.FILES["modelImage"]
+            try:
+                model_image.image=file
+            except Exception as e:
+                print(e)
+        except Exception as e:
+            print(e)
+
+        try:
+            modelImageName = request.data["name"]
+            model_image.product_name = modelImageName
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.small_size_price = request.data["smallSizePrice"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.medium_size_price = request.data["mediumSizePrice"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.large_size_price = request.data["largeSizePrice"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.small_size_oil_paint_on_canvas_price = request.data["smallPaintSize"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.medium_size_oil_paint_on_canvas_price = request.data["mediumPaintSize"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.large_size_oil_paint_on_canvas_price = request.data["largePaintSize"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.small_size_print_on_metal = request.data["smallPrintMetalSize"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.medium_size_print_on_metal = request.data["mediumPrintMetalSize"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.large_size_print_on_metal = request.data["largePrintMetalSize"]
+        except Exception as e:
+            print(e)
+        model_image.save()
+        response["status"] = "ok"
+    return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def add_suits(request):
+    response = {"status": "failed"}
+    print(request)
+    files = request.FILES
+    print(files)
+    for key, value in files.items():
+        suit = Suit.objects.create(suit_image=value)
+
+    response["status"] = "ok"
+    
+    return Response(response)
+
 
