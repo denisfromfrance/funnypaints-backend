@@ -31,6 +31,16 @@ class ModelImage(models.Model):
     image = models.FileField(upload_to="images/model-images")
     image_category = models.ForeignKey(ImageCategories, on_delete=models.CASCADE)
     wall_images = models.ManyToManyField(WallImage, through='ModelImageHasWallImage')
+    small_size_price = models.FloatField(default=0)
+    medium_size_price = models.FloatField(default=0)
+    large_size_price = models.FloatField(default=0)
+    small_size_oil_paint_on_canvas_price = models.FloatField(default=0)
+    medium_size_oil_paint_on_canvas_price = models.FloatField(default=0)
+    large_size_oil_paint_on_canvas_price = models.FloatField(default=0)
+    small_size_print_on_metal = models.FloatField(default=0)
+    medium_size_print_on_metal = models.FloatField(default=0)
+    large_size_print_on_metal = models.FloatField(default=0)
+
 
 class ModelImageHasWallImage(models.Model):
     id = models.AutoField(primary_key=True)
@@ -56,3 +66,9 @@ class UserSelectedImage(models.Model):
     id = models.AutoField(primary_key=True)
     image = models.FileField(upload_to="images/user-selected-images")
     paintRequest = models.ForeignKey(PaintRequest, on_delete=models.CASCADE, null=True)
+
+
+
+class Suit(models.Model):
+    id = models.AutoField(primary_key=True)
+    suit_image = models.FileField(upload_to='images/suits')

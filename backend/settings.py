@@ -107,10 +107,10 @@ DATABASES = {
          "HOST": "127.0.0.1",
          "PORT": "3306"
     }
-    #"default": {
+    # "default": {
     #    "ENGINE": "django.db.backends.sqlite3",
     #    "NAME": "db.sqlite3",
-    #}
+    # }
 }
 
 
@@ -163,5 +163,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 
 
-DOMAIN = "http://127.0.01:8000"
-# DOMAIN = "https://api.funnypaints.com"
+# DOMAIN = "http://127.0.01:8000"
+DOMAIN = "https://api.funnypaints.com"

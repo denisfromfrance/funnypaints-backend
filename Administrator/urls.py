@@ -12,4 +12,11 @@ urlpatterns = [
     path("wall-images/add", views.add_wall_images),
     path("wall-images/get", views.get_wall_images),
     path("painting-requests", views.get_all_painting_requests),
+
+    path("category/delete", views.delete_category),
+    path("category/rename", views.rename_category),
+    path("category/model/delete", views.delete_model),
+    path("category/model/change", views.change_model),
+
+    path("suits/add", views.add_suits),
 ]
