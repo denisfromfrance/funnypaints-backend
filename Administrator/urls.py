@@ -18,5 +18,9 @@ urlpatterns = [
     path("category/model/delete", views.delete_model),
     path("category/model/change", views.change_model),
 
+    # path("preview-images/add", views.add_preview_image),
+    path("preview-images/get", views.get_preview_image),
+    path("preview-images/delete", views.delete_preview_image),
+
     path("suits/add", views.add_suits),
 ]
