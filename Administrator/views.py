@@ -434,3 +434,55 @@ def add_suits(request):
     return Response(response)
 
 
+
+# @api_view(["POST"])
+# @authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# def add_preview_image(request):
+#     response = {"status": "failed"}
+#     files = request.FILES
+
+#     for key, value in files.items():
+#         wallImage = WallImage.objects.create(image=value)
+
+#     response["status"] = "ok"
+#     return Response(response)
+
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_preview_image(request):
+    response = {"status": "failed"}
+    previewImages = []
+
+    for image in WallImage.objects.all():
+        previewImages.append({
+            "wallImageID": image.id,
+            "image": settings.DOMAIN + image.image.url
+        })
+
+    response["previewImages"] = previewImages
+    response["status"] = "ok"
+    return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_preview_image(request):
+    response = {"status": "failed"}
+    try:
+        data = request.data
+        imageID = data["imageID"]
+        wallImage = WallImage.objects.get(id=imageID)
+        if wallImage is not None:
+            path = wallImage.image.path
+            wallImage.delete()
+            os.remove(path)
+            response["status"] = "ok"
+    except Exception as e:
+        print(e)
+        pass
+    return Response(response)
+
