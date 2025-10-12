@@ -413,6 +413,24 @@ def change_model(request):
             model_image.large_size_print_on_metal = request.data["largePrintMetalSize"]
         except Exception as e:
             print(e)
+
+
+        try:
+            model_image.small_size_print_on_paper = request.data["smallPrintPaperSize"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.medium_size_print_on_paper = request.data["mediumPrintPaperSize"]
+        except Exception as e:
+            print(e)
+
+        try:
+            model_image.large_size_print_on_paper = request.data["largePrintPaperSize"]
+        except Exception as e:
+            print(e)
+
+
         model_image.save()
         response["status"] = "ok"
     return Response(response)

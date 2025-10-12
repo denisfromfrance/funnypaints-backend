@@ -150,3 +150,46 @@ def upload_user_profile_image(request):
         pass
 
     return Response(response)
+
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([AllowAny])
+def add_item_to_cart(request):
+    response = {"status": "failed"}
+    try:
+        data = request.data
+        wall_image_id = data["wallImage"]
+        model_image_id = data["modelImage"]
+
+        files = request.FILES.getlist("userSelectedImage")
+
+        cart = request.session.get("cart", [])
+        cart.append({
+            "wallImageID": wall_image_id,
+            "modelImageID": model_image_id,
+            "files": files,
+        })
+
+        request.session["cart"] = cart
+        response["status"] = "ok"
+    except Exception as e:
+        print(e)
+        pass
+    return Response(response)
+
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([AllowAny])
+def get_items_in_cart(request):
+    response = {"status": "failed"}
+    try:
+        cart = request.session.get("cart", [])
+        response["cart"] = cart
+        response["status"] = "ok"
+    except Exception as e:
+        print(e)
+        pass
+    return Response(response)

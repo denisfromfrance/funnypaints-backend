@@ -21,6 +21,8 @@ from Administrator.models import RequestStatus
 
 from .models import *
 
+from Administrator.models import Suit
+
 # Create your views here.
 
 
@@ -46,7 +48,16 @@ def get_categories(request):
                             "image": settings.DOMAIN + image_model.image.url,
                             "smallSize": image_model.small_size_price,
                             "mediumSize": image_model.medium_size_price,
-                            "largeSize": image_model.large_size_price
+                            "largeSize": image_model.large_size_price,
+                            "smallPaintOnCanvasSize": image_model.small_size_oil_paint_on_canvas_price,
+                            "mediumPaintOnCanvasSize": image_model.medium_size_oil_paint_on_canvas_price,
+                            "largePaintOnCanvasSize": image_model.large_size_oil_paint_on_canvas_price,
+                            "smallPrintMetalSize": image_model.small_size_print_on_metal,
+                            "mediumPrintMetalSize": image_model.medium_size_print_on_metal,
+                            "largePrintMetalSize": image_model.large_size_print_on_metal,
+                            "smallPrintPaperSize": image_model.small_size_print_on_paper,
+                            "mediumPrintPaperSize": image_model.medium_size_print_on_paper,
+                            "largePrintPaperSize": image_model.large_size_print_on_paper
                         } 
                         for image_model in category.modelimage_set.all()
                     ]
@@ -188,6 +199,27 @@ def add_painting_size(request):
 
         if size is not None:
             response["status"] = "ok"
+    except Exception as e:
+        print(e)
+        pass
+    return Response(response)
+
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([AllowAny])
+def get_suits(request):
+    response = {"status": "failed"}
+    try:
+        suitData = []
+        suits = Suit.objects.all()
+        for suit in suits:
+            suitData.append({
+                "id": suit.id,
+                "suitImage": settings.DOMAIN + suit.suit_image.url
+            })
+        response["suits"] = suitData
+        response["status"] = "ok"
     except Exception as e:
         print(e)
         pass

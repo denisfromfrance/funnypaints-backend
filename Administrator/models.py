@@ -25,6 +25,15 @@ class WallImage(models.Model):
     id = models.AutoField(primary_key=True)
     image = models.FileField(upload_to="images/wall-images")
 
+
+class ProductVariation(models.Model):
+    id = models.AutoField(primary_key=True)
+    variation = models.CharField(max_length=50)
+    small = models.FloatField(default=0)
+    medium = models.FloatField(default=0)
+    large = models.FloatField(default=0)
+
+
 class ModelImage(models.Model):
     id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=20)
@@ -40,6 +49,16 @@ class ModelImage(models.Model):
     small_size_print_on_metal = models.FloatField(default=0)
     medium_size_print_on_metal = models.FloatField(default=0)
     large_size_print_on_metal = models.FloatField(default=0)
+    small_size_print_on_paper = models.FloatField(default=0)
+    medium_size_print_on_paper = models.FloatField(default=0)
+    large_size_print_on_paper = models.FloatField(default=0)
+    variation = models.ManyToManyField(ProductVariation, through="ModelHasVariation")
+
+
+class ModelHasVariation(models.Model):
+    id = models.AutoField(primary_key=True)
+    modelImage = models.ForeignKey(ModelImage, on_delete=models.CASCADE)
+    modelImageVariation = models.ForeignKey(ProductVariation, on_delete=models.CASCADE)
 
 
 class ModelImageHasWallImage(models.Model):
