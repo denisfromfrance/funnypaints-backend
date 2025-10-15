@@ -17,10 +17,11 @@ from rest_framework.permissions import (
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 
-from .models import ImageCategories, ModelImage, WallImage, PaintRequest, RequestStatus, Suit
+from .models import *
 
 from django.conf import settings
-
+import json
+import traceback
 import os
 
 # Create your views here.
@@ -333,6 +334,20 @@ def delete_model(request):
         print(e)
     return Response(response)
 
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_size(request):
+    response = {"status": "failed"}
+    try:
+        sizeID = request.data["sizeID"]
+        size = Size.objects.get(id=sizeID)
+        size.delete()
+        response["status"] = "ok"
+    except Exception as e:
+        print(e)
+    return Response(response)
+
 
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
@@ -346,93 +361,132 @@ def change_model(request):
         model_image = ModelImage.objects.get(id=modelImageID)
     except:
         categoryID = request.data["categoryID"]
+        print("CategoryID: ", categoryID)
         category = ImageCategories.objects.get(id=categoryID)
 
         if category is not None:
+            print("Category is not none")
             model_image = ModelImage.objects.create(
+                product_name=request.data["name"],
                 image_category=category
             )
-
-    if model_image is not None:
-        try:
-            file = request.FILES["modelImage"]
+    try:
+        variations = json.loads(request.data["variations"])
+        print(variations)
+        for variation in variations:
+            print(variation["variation"])
             try:
-                model_image.image=file
+                variationID = variation["variation"]["id"]
             except Exception as e:
-                print(e)
-        except Exception as e:
-            print(e)
-
-        try:
-            modelImageName = request.data["name"]
-            model_image.product_name = modelImageName
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.small_size_price = request.data["smallSizePrice"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.medium_size_price = request.data["mediumSizePrice"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.large_size_price = request.data["largeSizePrice"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.small_size_oil_paint_on_canvas_price = request.data["smallPaintSize"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.medium_size_oil_paint_on_canvas_price = request.data["mediumPaintSize"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.large_size_oil_paint_on_canvas_price = request.data["largePaintSize"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.small_size_print_on_metal = request.data["smallPrintMetalSize"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.medium_size_print_on_metal = request.data["mediumPrintMetalSize"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.large_size_print_on_metal = request.data["largePrintMetalSize"]
-        except Exception as e:
-            print(e)
-
-
-        try:
-            model_image.small_size_print_on_paper = request.data["smallPrintPaperSize"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.medium_size_print_on_paper = request.data["mediumPrintPaperSize"]
-        except Exception as e:
-            print(e)
-
-        try:
-            model_image.large_size_print_on_paper = request.data["largePrintPaperSize"]
-        except Exception as e:
-            print(e)
-
-
+                variationID = variation["id"]
+            productVariation = ProductVariation.objects.get(id=variationID)
+            print("Variation ID: ", variationID)
+            for size in variation["sizes"]:
+                sizeObj = Size.objects.get(id=size["id"])
+                productVariantHasSize = ProductVariantHasSize.objects.filter(variation=productVariation, product=model_image, size=sizeObj)
+                if len(productVariantHasSize) == 1:
+                    productVariantHasSize[0].price = size["price"]
+                    productVariantHasSize[0].save()
+                elif len(productVariantHasSize) == 0:
+                    productVariantHasSize = ProductVariantHasSize.objects.create(
+                        variation=productVariation,
+                        size=sizeObj,
+                        price=size["price"],
+                        product=model_image
+                    )
+                print("Size ID: ", size["id"])
+                # print("Width: ", size["sizeObj"]["width"])
+                # print("Height: ", size["sizeObj"]["height"])
+                # print("Unit: ", size["sizeObj"]["unit"])
+                print("Price: ", size["price"])
+            print("\n\n")
         model_image.save()
-        response["status"] = "ok"
+    except Exception as e:
+        # print(e)
+        traceback.print_exc(e)
+
+    # if model_image is not None:
+    #     try:
+    #         file = request.FILES["image"]
+    #         try:
+    #             model_image.image=file
+    #             model_image.save()
+    #         except Exception as e:
+    #             print(e)
+    #     except Exception as e:
+    #         print(e)
+
+        # response["status"] = "ok"
+
+    #     try:
+    #         modelImageName = request.data["name"]
+    #         model_image.product_name = modelImageName
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.small_size_price = request.data["smallSizePrice"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.medium_size_price = request.data["mediumSizePrice"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.large_size_price = request.data["largeSizePrice"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.small_size_oil_paint_on_canvas_price = request.data["smallPaintSize"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.medium_size_oil_paint_on_canvas_price = request.data["mediumPaintSize"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.large_size_oil_paint_on_canvas_price = request.data["largePaintSize"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.small_size_print_on_metal = request.data["smallPrintMetalSize"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.medium_size_print_on_metal = request.data["mediumPrintMetalSize"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.large_size_print_on_metal = request.data["largePrintMetalSize"]
+    #     except Exception as e:
+    #         print(e)
+
+
+    #     try:
+    #         model_image.small_size_print_on_paper = request.data["smallPrintPaperSize"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.medium_size_print_on_paper = request.data["mediumPrintPaperSize"]
+    #     except Exception as e:
+    #         print(e)
+
+    #     try:
+    #         model_image.large_size_print_on_paper = request.data["largePrintPaperSize"]
+    #     except Exception as e:
+    #         print(e)
+
+
+    #     model_image.save()
     return Response(response)
 
 
@@ -502,5 +556,53 @@ def delete_preview_image(request):
     except Exception as e:
         print(e)
         pass
+    return Response(response)
+
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_product_variations(request):
+    response = {"status": "failed"}
+    variations = []
+    for variation in ProductVariation.objects.all():
+        variations.append({
+            "id": variation.id,
+            "variation": variation.variation
+        })
+    response["variations"] = variations
+    response["status"] = "ok"
+    print(response)
+    return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def add_product_variation(request):
+    response = {"status": "failed"}
+    try:
+        data = request.data
+        variation = ProductVariation.objects.create(variation=data["variation"])
+        if variation is not None:
+            response["status"] = "ok"
+    except Exception as e:
+        print(e)
+    return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_product_variation(request):
+    response = {"status": "failed"}
+    try:
+        data = request.data
+        variation = ProductVariation.objects.get(id=data["id"])
+        if variation is not None:
+            variation.delete()
+            response["status"] = "ok"
+    except Exception as e:
+        print(e)
     return Response(response)
 

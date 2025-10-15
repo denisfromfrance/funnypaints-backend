@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 from django.utils import timezone
 
-from Data.models import Country, State, City
+from Data.models import Country, State, City, Size
 
 # Create your models here.
 class RegisteredUser(models.Model):
@@ -32,6 +32,7 @@ class ProductVariation(models.Model):
     small = models.FloatField(default=0)
     medium = models.FloatField(default=0)
     large = models.FloatField(default=0)
+    sizes = models.ManyToManyField(Size, through="ProductVariantHasSize")
 
 
 class ModelImage(models.Model):
@@ -52,13 +53,14 @@ class ModelImage(models.Model):
     small_size_print_on_paper = models.FloatField(default=0)
     medium_size_print_on_paper = models.FloatField(default=0)
     large_size_print_on_paper = models.FloatField(default=0)
-    variation = models.ManyToManyField(ProductVariation, through="ModelHasVariation")
 
 
-class ModelHasVariation(models.Model):
+class ProductVariantHasSize(models.Model):
     id = models.AutoField(primary_key=True)
-    modelImage = models.ForeignKey(ModelImage, on_delete=models.CASCADE)
-    modelImageVariation = models.ForeignKey(ProductVariation, on_delete=models.CASCADE)
+    variation = models.ForeignKey(ProductVariation, on_delete=models.CASCADE)
+    size = models.ForeignKey(Size, on_delete=models.CASCADE)
+    price = models.FloatField(default=0)
+    product = models.ForeignKey(ModelImage, on_delete=models.CASCADE)
 
 
 class ModelImageHasWallImage(models.Model):

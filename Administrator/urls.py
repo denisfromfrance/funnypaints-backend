@@ -14,6 +14,7 @@ urlpatterns = [
     path("painting-requests", views.get_all_painting_requests),
 
     path("category/delete", views.delete_category),
+    path("size/delete", views.delete_size),
     path("category/rename", views.rename_category),
     path("category/model/delete", views.delete_model),
     path("category/model/change", views.change_model),
@@ -21,6 +22,10 @@ urlpatterns = [
     # path("preview-images/add", views.add_preview_image),
     path("preview-images/get", views.get_preview_image),
     path("preview-images/delete", views.delete_preview_image),
+
+    path("product/variations", views.get_product_variations),
+    path("product/variations/add", views.add_product_variation),
+    path("product/variations/delete", views.delete_product_variation),
 
     path("suits/add", views.add_suits),
 ]
