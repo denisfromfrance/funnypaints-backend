@@ -41,10 +41,56 @@ def get_categories(request):
                 categories_info.append({
                     "id": category.id,
                     "category": category.category,
-                    "images": [
+                    "images": []
+                })
+
+                for image_model in category.modelimage_set.all():
+                    # print(dir(image_model))
+                    productVariantInformation = {}
+                    for productVariantHasSize in image_model.productvarianthassize_set.all():
+                        # print(image_model.product_name)
+                        # print(productVariantHasSize)
+                        if productVariantInformation.keys().__contains__(productVariantHasSize.variation.variation):
+                            productVariantInformation[productVariantHasSize.variation.variation]["sizes"].append(
+                                {
+                                    "id": productVariantHasSize.size.id,
+                                    "sizeObj": {
+                                        "id": productVariantHasSize.size.id,
+                                        "size": productVariantHasSize.size.size,
+                                        "width": productVariantHasSize.size.width,
+                                        "height": productVariantHasSize.size.height,
+                                        "unit": productVariantHasSize.size.unit,
+                                        "price": productVariantHasSize.size.price
+                                    },
+                                    "price": productVariantHasSize.price
+                                }
+                            )
+                        else:
+                            productVariantInformation[productVariantHasSize.variation.variation] = {
+                                "variation": {
+                                    "id": productVariantHasSize.variation.id,
+                                    "variation": productVariantHasSize.variation.variation,
+                                },
+                                "sizes": [
+                                    {
+                                        "id": productVariantHasSize.size.id, 
+                                        "sizeObj": {
+                                            "id": productVariantHasSize.size.id,
+                                            "size": productVariantHasSize.size.size,
+                                            "width": productVariantHasSize.size.width,
+                                            "height": productVariantHasSize.size.height,
+                                            "unit": productVariantHasSize.size.unit,
+                                            "price": productVariantHasSize.size.price
+                                        },
+                                        "price": productVariantHasSize.price
+                                    }
+                                ]
+                            }
+                    categories_info[-1]["images"].append(
                         {
-                            "imageID": image_model.id, 
-                            "productName": image_model.product_name, 
+                            "imageID": image_model.id,
+                            "categoryID": category.id,
+                            "productName": image_model.product_name,
                             "image": settings.DOMAIN + image_model.image.url,
                             "smallSize": image_model.small_size_price,
                             "mediumSize": image_model.medium_size_price,
@@ -57,12 +103,12 @@ def get_categories(request):
                             "largePrintMetalSize": image_model.large_size_print_on_metal,
                             "smallPrintPaperSize": image_model.small_size_print_on_paper,
                             "mediumPrintPaperSize": image_model.medium_size_print_on_paper,
-                            "largePrintPaperSize": image_model.large_size_print_on_paper
-                        } 
-                        for image_model in category.modelimage_set.all()
-                    ]
-                })
-        response["wallImages"] = [{"wallImageID": wall_image.id, "image": settings.DOMAIN + wall_image.image.url} for wall_image in WallImage.objects.all()]
+                            "largePrintPaperSize": image_model.large_size_print_on_paper,
+                            "variations": productVariantInformation.values()
+                        }
+                    )
+        response["wallImages"] = [{"wallImageID": wall_image.id, "image": settings.DOMAIN +
+                                   wall_image.image.url} for wall_image in WallImage.objects.all()]
         response["status"] = "ok"
     except Exception as e:
         print(e)
