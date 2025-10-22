@@ -14,8 +14,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 
 from Data.models import Country, State, City
-
 from django.conf import settings
+
+import json
+
+from Administrator.models import ModelImage, WallImage
 
 # Create your views here.
 
@@ -160,19 +163,25 @@ def add_item_to_cart(request):
     response = {"status": "failed"}
     try:
         data = request.data
+        print(data)
         wall_image_id = data["wallImage"]
         model_image_id = data["modelImage"]
+        variantInformation = json.loads(data["variantInformation"])
+        # files = request.FILES["userSelectedImage"]
 
-        files = request.FILES.getlist("userSelectedImage")
+        modelImage = ModelImage.objects.get(id=model_image_id)
+        modelImageURL = settings.DOMAIN + modelImage.image.url
 
         cart = request.session.get("cart", [])
         cart.append({
             "wallImageID": wall_image_id,
             "modelImageID": model_image_id,
-            "files": files,
+            # "files": files,
+            "modelImageURL": modelImageURL
         })
 
         request.session["cart"] = cart
+        request.session.save()
         response["status"] = "ok"
     except Exception as e:
         print(e)
@@ -187,6 +196,9 @@ def get_items_in_cart(request):
     response = {"status": "failed"}
     try:
         cart = request.session.get("cart", [])
+        # print(dir(request.session))
+        # print(request.session.session_key)
+        print("Cart: ", cart)
         response["cart"] = cart
         response["status"] = "ok"
     except Exception as e:
