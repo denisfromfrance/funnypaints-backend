@@ -405,16 +405,16 @@ def change_model(request):
         # print(e)
         traceback.print_exc(e)
 
-    # if model_image is not None:
-    #     try:
-    #         file = request.FILES["image"]
-    #         try:
-    #             model_image.image=file
-    #             model_image.save()
-    #         except Exception as e:
-    #             print(e)
-    #     except Exception as e:
-    #         print(e)
+    if model_image is not None:
+        try:
+            file = request.FILES["image"]
+            try:
+                model_image.image=file
+                model_image.save()
+            except Exception as e:
+                print(e)
+        except Exception as e:
+            print(e)
 
         # response["status"] = "ok"
 
