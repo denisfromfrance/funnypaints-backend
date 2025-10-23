@@ -410,19 +410,20 @@ def change_model(request):
             file = request.FILES["image"]
             try:
                 model_image.image=file
-                model_image.save()
             except Exception as e:
                 print(e)
         except Exception as e:
             print(e)
 
-        # response["status"] = "ok"
+        try:
+            modelImageName = request.data["name"]
+            model_image.product_name = modelImageName
+        except Exception as e:
+            print(e)
 
-    #     try:
-    #         modelImageName = request.data["name"]
-    #         model_image.product_name = modelImageName
-    #     except Exception as e:
-    #         print(e)
+        model_image.save()
+
+        response["status"] = "ok"
 
     #     try:
     #         model_image.small_size_price = request.data["smallSizePrice"]
