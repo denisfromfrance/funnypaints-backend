@@ -174,5 +174,5 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 
-# DOMAIN = "http://127.0.01:8000"
-DOMAIN = "https://api.funnypaints.com"
+DOMAIN = "http://127.0.01:8000"
+# DOMAIN = "https://api.funnypaints.com"

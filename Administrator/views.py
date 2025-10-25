@@ -607,3 +607,71 @@ def delete_product_variation(request):
         print(e)
     return Response(response)
 
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_home_page(request):
+    response = {"status": "failed"}
+    try:
+        data = request.data
+        print(data)
+        homepageData = HomePageData.objects.get(id=1)
+        if homepageData is not None:
+            try:
+                mainHeadline = data["mainHeadline"]
+                homepageData.mainHeading = mainHeadline
+            except:
+                pass
+
+            try:
+                subheading = data["subheading"]
+                homepageData.subheading = subheading
+            except:
+                pass
+
+            try:
+                image = data["image"]
+                homepageData.heroImage = image
+            except:
+                pass
+
+            homepageData.save()
+    except:
+        mainHeadline = data["mainHeadline"]
+        subheading = data["subheading"]
+        image = data["image"]
+
+        homepageData = HomePageData.objects.create(
+            mainHeading=mainHeadline,
+            subheading=subheading,
+            heroImage=image
+        )
+        homepageData.save()
+
+    response["status"] = "ok"
+    return Response(response)
+
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([AllowAny])
+def get_home_page_information(request):
+    response = {"status": "failed"}
+
+    data = {}
+    print(data)
+    homepageData = HomePageData.objects.get(id=1)
+    if homepageData is not None:
+        try:
+            data["mainHeadline"] = homepageData.mainHeading
+            data["subheading"] = homepageData.subheading
+            if (homepageData.heroImage):
+                data["image"] = settings.DOMAIN + homepageData.heroImage.url
+        except:
+            pass
+
+    response["data"] = data
+    response["status"] = "ok"
+    return Response(response)
