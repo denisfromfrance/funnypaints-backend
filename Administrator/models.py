@@ -93,3 +93,10 @@ class UserSelectedImage(models.Model):
 class Suit(models.Model):
     id = models.AutoField(primary_key=True)
     suit_image = models.FileField(upload_to='images/suits')
+
+
+class HomePageData(models.Model):
+    id = models.AutoField(primary_key=True)
+    mainHeading = models.CharField(max_length=50)
+    subheading = models.CharField(max_length=100)
+    heroImage = models.FileField(upload_to='image/pages/home/hero-section-image')

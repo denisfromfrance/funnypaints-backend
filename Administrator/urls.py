@@ -28,4 +28,7 @@ urlpatterns = [
     path("product/variations/delete", views.delete_product_variation),
 
     path("suits/add", views.add_suits),
+
+    path("pages/home/update", views.update_home_page),
+    path("pages/home/information/get", views.get_home_page_information),
 ]

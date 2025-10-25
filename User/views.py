@@ -197,7 +197,7 @@ def get_items_in_cart(request):
     try:
         cart = request.session.get("cart", [])
         # print(dir(request.session))
-        # print(request.session.session_key)
+        print(request.session.session_key)
         print("Cart: ", cart)
         response["cart"] = cart
         response["status"] = "ok"
