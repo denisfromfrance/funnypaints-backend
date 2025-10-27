@@ -655,8 +655,8 @@ def update_home_page(request):
 
 
 @api_view(["GET"])
-@authentication_classes([JWTAuthentication])
-@permission_classes([AllowAny])
+@authentication_classes([])
+@permission_classes([])
 def get_home_page_information(request):
     response = {"status": "failed"}
 

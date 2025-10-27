@@ -173,11 +173,17 @@ def add_item_to_cart(request):
         modelImageURL = settings.DOMAIN + modelImage.image.url
 
         cart = request.session.get("cart", [])
+        id = 1
+        if len(cart) > 0:
+            id = cart[-1]["id"] + 1
+
         cart.append({
+            "id": id,
             "wallImageID": wall_image_id,
             "modelImageID": model_image_id,
             # "files": files,
-            "modelImageURL": modelImageURL
+            "modelImageURL": modelImageURL,
+            "variantInformation": variantInformation
         })
 
         request.session["cart"] = cart
@@ -190,8 +196,8 @@ def add_item_to_cart(request):
 
 
 @api_view(["GET"])
-@authentication_classes([JWTAuthentication])
-@permission_classes([AllowAny])
+@authentication_classes([])
+@permission_classes([])
 def get_items_in_cart(request):
     response = {"status": "failed"}
     try:
@@ -199,9 +205,35 @@ def get_items_in_cart(request):
         # print(dir(request.session))
         print(request.session.session_key)
         print("Cart: ", cart)
+        cost = 0
+        for itemIndex in range(len(cart)):
+            cost = 0
+            modelImage = ModelImage.objects.get(id=cart[itemIndex]["modelImageID"])
+            productVariations = modelImage.productvarianthassize_set.all()
+            # print(productVariations)
+            for variantInformation in cart[itemIndex]["variantInformation"]["variantIDs"]:
+                # print(type(variantInformation))
+                variantID = variantInformation["variantID"]
+                for productVariantHasSize in productVariations:
+                    # print(productVariantHasSize.id)
+                    if productVariantHasSize.variation.id == variantID:
+                        # print(productVariantHasSize)
+                        cost += productVariantHasSize.price
+                # print(variantInformation)
+                # for variantIDS in json.loads(variantInformation)["variantIDs"]:
+                #     print(variantIDS)
+            cart[itemIndex]["cost"] = cost
         response["cart"] = cart
         response["status"] = "ok"
     except Exception as e:
         print(e)
         pass
     return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([])
+def clear_cart(request):
+    request.session["cart"] = []
+    return Response({"status": "ok"})
