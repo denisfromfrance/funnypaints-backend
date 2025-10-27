@@ -19,7 +19,7 @@ class RegisteredUser(models.Model):
 
 class ImageCategories(models.Model):
     id = models.AutoField(primary_key=True)
-    category = models.CharField(max_length=15)
+    category = models.CharField(max_length=100)
 
 class WallImage(models.Model):
     id = models.AutoField(primary_key=True)
