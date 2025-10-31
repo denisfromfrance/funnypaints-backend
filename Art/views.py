@@ -29,8 +29,11 @@ from Administrator.models import *
 import datetime
 import time
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
-WEBHOOK_SECRET = settings.STRIPE_WEBHOOK_SECRET
+stripe.api_key = settings.STRIPE_LIVE_SECRET_KEY
+# stripe.api_key = settings.STRIPE_SECRET_KEY
+
+WEBHOOK_SECRET = settings.STRIPE_LIVE_WEBHOOK_SECRET
+# WEBHOOK_SECRET = settings.STRIPE_WEBHOOK_SECRET
 
 def generate_invoice_number():
     now = datetime.datetime.now()
