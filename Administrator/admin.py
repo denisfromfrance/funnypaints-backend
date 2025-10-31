@@ -11,4 +11,7 @@ admin.site.register([
     PaintRequest, 
     RequestStatus, 
     Suit,
-    ProductVariantHasSize])
+    ProductVariantHasSize,
+    Order,
+    PaintRequestHasProductVariantHasSize,
+    TempUploads])

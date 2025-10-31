@@ -18,7 +18,7 @@ from django.conf import settings
 
 import json
 
-from Administrator.models import ModelImage, WallImage
+from Administrator.models import *
 
 # Create your views here.
 
@@ -126,7 +126,6 @@ def get_user_profile(request):
             "name": registeredUser.state.name
         }
         userInformation["street"] = registeredUser.street
-
     response["profileInformation"] = userInformation
     response["status"] = "ok"
     return Response(response)
@@ -163,17 +162,17 @@ def add_item_to_cart(request):
     response = {"status": "failed"}
     try:
         data = request.data
-        print(data)
+        # print(data)
         wall_image_id = data["wallImage"]
         model_image_id = data["modelImage"]
         variantInformation = json.loads(data["variantInformation"])
-        # files = request.FILES["userSelectedImage"]
 
         modelImage = ModelImage.objects.get(id=model_image_id)
         modelImageURL = settings.DOMAIN + modelImage.image.url
 
         cart = request.session.get("cart", [])
         id = 1
+
         if len(cart) > 0:
             id = cart[-1]["id"] + 1
 
@@ -185,6 +184,23 @@ def add_item_to_cart(request):
             "modelImageURL": modelImageURL,
             "variantInformation": variantInformation
         })
+
+        try:
+            # print(request.FILES)
+            files = request.FILES
+            file = files["userSelectedImage"]
+            # print(file)
+            tempUpload = TempUploads.objects.create(file=file)
+            uploadFileURL = settings.DOMAIN + tempUpload.file.url
+            # print(uploadFileURL)
+            cart[-1]["userUploadedImage"] = tempUpload.id
+            cart[-1]["userUploadedImagePath"] = uploadFileURL
+            # print("Updated cart:", cart)
+        except Exception as e:
+            print(e)
+            pass
+
+        # cart = cart[:-1]
 
         request.session["cart"] = cart
         request.session.save()
@@ -203,8 +219,8 @@ def get_items_in_cart(request):
     try:
         cart = request.session.get("cart", [])
         # print(dir(request.session))
-        print(request.session.session_key)
-        print("Cart: ", cart)
+        # print(request.session.session_key)
+        # print("Cart: ", cart)
         cost = 0
         for itemIndex in range(len(cart)):
             cost = 0
@@ -234,6 +250,92 @@ def get_items_in_cart(request):
 @api_view(["POST"])
 @authentication_classes([])
 @permission_classes([])
+def remove_cart_item(request):
+    try:
+        id = request.data["id"]
+        cart = request.session.get("cart", [])
+        updatedCart = []
+        for cartItem in cart:
+            if cartItem["id"] != id:
+                updatedCart.append(cartItem)
+        request.session["cart"] = updatedCart
+        return Response({"status": "failed"})
+    except Exception as e:
+        print(e)
+        pass
+    return Response({"status": "ok"})
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([])
 def clear_cart(request):
     request.session["cart"] = []
     return Response({"status": "ok"})
+
+
+@api_view(["POST"])
+@permission_classes([])
+@authentication_classes([])
+def get_invoice(request):
+    response = {"status": "failed"}
+    try:
+        invoiceID = request.data["invoiceID"]
+        invoice = Invoice.objects.get(id=invoiceID)
+        if invoice is not None:
+            paymentStatus = ""
+
+            if invoice.order.payment_status == -1:
+                paymentStatus = "Failed"
+            elif invoice.order.payment_status == 0:
+                paymentStatus = "Processing"
+            elif invoice.order.payment_status == 1:
+                paymentStatus = "Successful"
+
+            invoiceData = {
+                "invoiceID": invoice.invoice_number,
+                "invoiceDate": invoice.invoice_date,
+                "paymentDate": invoice.payment_date,
+                "currency": invoice.currency,
+                "paymentStatus": paymentStatus,
+                "amount": invoice.amount
+            }
+
+            order = invoice.order
+            orderedItems = {}
+            for item in order.paintrequesthasproductvarianthassize_set.all():
+                product = item.product
+                if orderedItems.keys().__contains__(product.id):
+                    variations = orderedItems[product.id]["variations"]
+                    if variations.keys().__contains__(item.variation.variation):
+                        information = variations[item.variation.variation]
+                        sizes = information["sizes"]
+
+                        if not sizes.__contains__(item.size.size):
+                            sizes.append(f"{item.size.width}x{item.size.height}")
+                        
+                        information["sizes"] = sizes
+                        variations[item.variation.variation] = information
+
+                    orderedItems["variations"] = variations
+                else:
+                    orderedItems[product.id] = {
+                        "variations": {
+                            f"{item.variation.variation}": {
+                                "sizes": [f"{item.size.width}x{item.size.height}"]
+                            }
+                        }
+                    }
+                # order
+                # user_uploaded_image
+                    
+            response["invoiceData"] = invoiceData
+            response["orderedData"] = orderedItems
+
+            response["status"] = "ok"
+    except Exception as e:
+        print(e)
+        pass
+
+    print(response)
+    return Response(response)

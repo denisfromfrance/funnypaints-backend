@@ -35,11 +35,12 @@ def get_categories(request):
     categories_info = []
 
     try:
-        categories = ImageCategories.objects.all()
+        categories = ImageCategories.objects.all().order_by('priority')
         if categories is not None:
             for category in categories:
                 categories_info.append({
                     "id": category.id,
+                    "priority": category.priority,
                     "category": category.category,
                     "images": []
                 })

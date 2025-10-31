@@ -675,3 +675,24 @@ def get_home_page_information(request):
     response["data"] = data
     response["status"] = "ok"
     return Response(response)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def change_category_priorities(request):
+    response = {"status": "failed"}
+    data = request.data
+    try:
+        categories = data["categories"]
+        for category in categories:
+            print("Category ID: ", category["id"], end=" : ")
+            print("Category Priority: ", category["priority"])
+            c = ImageCategories.objects.get(id=category["id"])
+            if c is not None:
+                c.priority = category["priority"]
+                c.save()
+        # print(categories)
+    except:
+        pass
+    return Response(response)

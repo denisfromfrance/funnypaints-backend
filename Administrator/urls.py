@@ -8,6 +8,7 @@ urlpatterns = [
     path("change-painting-request-status", views.change_painting_request_status),
     path("get-images-pf-categories", views.get_images_of_categories),
     path("category/add", views.add_new_category),
+    path("category/change-priorities", views.change_category_priorities),
     path("model-images/add", views.add_model_images),
     path("wall-images/add", views.add_wall_images),
     path("wall-images/get", views.get_wall_images),
