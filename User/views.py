@@ -302,6 +302,7 @@ def get_invoice(request):
             }
 
             order = invoice.order
+
             orderedItems = {}
             for item in order.paintrequesthasproductvarianthassize_set.all():
                 product = item.product
@@ -317,9 +318,12 @@ def get_invoice(request):
                         information["sizes"] = sizes
                         variations[item.variation.variation] = information
 
-                    orderedItems["variations"] = variations
+                    orderedItems[product.id]["variations"] = variations
                 else:
                     orderedItems[product.id] = {
+                        "image": settings.DOMAIN + product.image.url,
+                        "name": product.product_name,
+                        "category": product.image_category.category,
                         "variations": {
                             f"{item.variation.variation}": {
                                 "sizes": [f"{item.size.width}x{item.size.height}"]
@@ -328,10 +332,9 @@ def get_invoice(request):
                     }
                 # order
                 # user_uploaded_image
-                    
+            print(invoiceData)
             response["invoiceData"] = invoiceData
             response["orderedData"] = orderedItems
-
             response["status"] = "ok"
     except Exception as e:
         print(e)
