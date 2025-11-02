@@ -183,8 +183,8 @@ def add_wall_images(request):
 
 
 @api_view(["GET"])
-@authentication_classes([JWTAuthentication])
-@permission_classes([AllowAny])
+@authentication_classes([])
+@permission_classes([])
 def get_wall_images(request):
     response = {"status": "failed"}
     data = request.data

@@ -253,8 +253,8 @@ def add_painting_size(request):
 
 
 @api_view(["GET"])
-@authentication_classes([JWTAuthentication])
-@permission_classes([AllowAny])
+@authentication_classes([])
+@permission_classes([])
 def get_suits(request):
     response = {"status": "failed"}
     try:
