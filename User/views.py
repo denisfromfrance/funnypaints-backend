@@ -303,6 +303,19 @@ def get_invoice(request):
 
             order = invoice.order
 
+            invoiceData["customerEmail"] = order.email_address
+            invoiceData["billingAddress"] = order.billing_street_address
+            invoiceData["shippingAddress"] = order.shipping_street_address
+            invoiceData["customerName"] = f"{order.first_name} {order.last_name}"
+# company
+# country
+# shipping_destination_type
+# post_code
+# city
+# province
+# phone
+# notes
+
             orderedItems = {}
             for item in order.paintrequesthasproductvarianthassize_set.all():
                 product = item.product
